@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UFO Crane Online</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+/>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=Noto+Sans+Thai:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <a class="brand" href="#home" aria-label="UFO Crane home">
+          <span class="brand-mark">UC</span>
+          <span>
+            <strong>UFO Crane</strong>
+            <small>online arcade</small>
+          </span>
+        </a>
+        <nav class="nav" aria-label="main navigation">
+          <a href="#home">Machines</a>
+          <a href="#events">Events</a>
+          <a href="#how">How to play</a>
+          <a href="#support">Support</a>
+        </nav>
+        <div class="wallet">
+          <span class="player-pill">Demo Player</span>
+          <span class="coin" id="cash-balance">0 THB</span>
+          <span class="points-pill" id="points-balance">0 pts</span>
+          <button class="cart-button" id="cart-button" type="button">
+            Cart <strong id="cart-count">0</strong>
+          </button>
+        </div>
+      </header>
+
+      <main id="app"></main>
+    </div>
+
+    <template id="home-template">
+      <section class="hero" id="events">
+        <div class="hero-copy">
+          <p class="eyebrow">Live prize drops this week</p>
+          <h1>ตู้คีบออนไลน์ที่รู้สึกเหมือนยืนหน้าเครื่องจริง</h1>
+          <hr />
+          <p>
+            เลือกเครื่อง ดูสถานะคิว แล้วกดเล่นได้จากหน้ารางวัลทันที
+            พร้อมแคมจำลอง ระบบยอดเงิน และแต้มสะสมแบบเดโม
+          </p>
+          <div class="hero-actions">
+            <a class="solid-button large" href="#machines">เริ่มเลือกเครื่อง</a>
+            <button class="ghost-button large" type="button" data-scroll="hot">
+              ดูเครื่องยอดนิยม
+            </button>
+          </div>
+        </div>
+        <div class="hero-stage" aria-label="featured arcade banners">
+          <img
+            src="assets/banner-crane.png"
+            alt="Neon crane machine event banner"
+          />
+          <div class="ticker">
+            <span>Free ticket drop</span>
+            <span>New plush series</span>
+            <span>Guaranteed win</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="browse" id="machines">
+        <aside class="filters" aria-label="machine filters">
+          <label class="search">
+            <span>Search</span>
+            <input
+              id="search-input"
+              type="search"
+              placeholder="ค้นหารายการสินค้า"
+            />
+          </label>
+          <div class="filter-group" data-filter-group="category">
+            <button class="filter active" type="button" data-filter="all">
+              ทั้งหมด
+            </button>
+            <button class="filter" type="button" data-filter="plush">
+              ตุ๊กตา
+            </button>
+            <button class="filter" type="button" data-filter="figure">
+              ฟิกเกอร์
+            </button>
+            <button class="filter" type="button" data-filter="snack">
+              ขนม / ของเล่น
+            </button>
+            <button class="filter" type="button" data-filter="limited">
+              Limited
+            </button>
+          </div>
+          <div class="filter-meta">
+            <span>Live</span>
+            <strong id="live-count">0</strong>
+          </div>
+        </aside>
+
+        <section class="catalog" aria-labelledby="catalog-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Prize shelf</p>
+              <h2 id="catalog-title">รายการตู้คีบ</h2>
+            </div>
+            <div class="chips" role="list" aria-label="quick filters">
+              <button class="chip active" type="button" data-quick="all">
+                All
+              </button>
+              <button class="chip" type="button" data-quick="available">
+                พร้อมเล่น
+              </button>
+              <button class="chip" type="button" data-quick="ticket">
+                Ticket OK
+              </button>
+              <button class="chip" type="button" data-quick="popular">
+                ยอดนิยม
+              </button>
+            </div>
+          </div>
+          <div class="machine-grid" id="machine-grid"></div>
+        </section>
+      </section>
+
+      <section class="info-band" id="how">
+        <div>
+          <p class="eyebrow">How it works</p>
+          <h2>เลือกเครื่อง ใช้ยอดเงินเล่นหรือซื้อสินค้า แล้วสะสมแต้มโบนัส</h2>
+        </div>
+        <div class="steps" aria-label="play steps">
+          <span>01 เลือกรางวัล</span>
+          <span>02 เข้าเครื่อง</span>
+          <span>03 เล็งและกด Drop</span>
+        </div>
+      </section>
+
+      <section class="support-band" id="support">
+        <p>
+          Prize history, shipping status, and payment support stay in one
+          account panel when connected to backend.
+        </p>
+        <button class="ghost-button" type="button">Contact support</button>
+      </section>
+    </template>
+
+    <template id="detail-template">
+      <section class="machine-page">
+        <div class="machine-title">
+          <a class="back-link" href="#home">กลับ</a>
+          <div>
+            <p class="eyebrow" id="detail-status">Live machine</p>
+            <h1 id="detail-name"></h1>
+          </div>
+          <span class="price-pill" id="detail-price"></span>
+        </div>
+
+        <div class="play-layout">
+          <section class="live-panel" aria-label="live claw machine camera">
+            <div class="camera-bar">
+              <span class="recording-dot"></span>
+              <span id="camera-label">CAM 01</span>
+              <div class="camera-tabs play-tools" aria-label="camera angles">
+                <button class="camera-tab active" type="button" data-camera="1">
+                  Front
+                </button>
+                <button class="camera-tab" type="button" data-camera="2">
+                  Side
+                </button>
+              </div>
+            </div>
+            <div class="machine-viewport" id="machine-viewport">
+              <img id="detail-hero" alt="" />
+              <div class="claw" id="claw">
+                <span></span>
+              </div>
+              <div class="camera-hud">
+                <span>LIVE</span>
+                <span id="camera-hud-label">FRONT CAMERA</span>
+              </div>
+              <div class="play-toast" id="play-toast">Press Play to start</div>
+            </div>
+            <div class="share-row" aria-label="share this machine">
+  <button type="button" data-share="facebook" class="social-icon">
+    <i class="fa-brands fa-facebook-f"></i>
+  </button>
+
+  <button type="button" data-share="tiktok" class="social-icon">
+    <i class="fa-brands fa-tiktok"></i>
+  </button>
+
+  <button type="button" data-share="instagram" class="social-icon">
+    <i class="fa-brands fa-instagram"></i>
+  </button>
+</div>
+          </section>
+
+          <aside class="control-panel">
+            <div class="queue">
+              <div>
+                <span>Waiting</span><strong id="detail-waiting"></strong>
+              </div>
+              <div>
+                <span>Browsing</span><strong id="detail-watching"></strong>
+              </div>
+              <div>
+                <span>1 Play</span><strong id="detail-price-inline"></strong>
+              </div>
+              <div>
+                <span>Buy now</span><strong id="detail-buy-inline"></strong>
+              </div>
+              <div>
+                <span>Play reward</span
+                ><strong id="detail-play-reward"></strong>
+              </div>
+              <div>
+                <span>Buy reward</span><strong id="detail-buy-reward"></strong>
+              </div>
+            </div>
+            <button class="play-button" id="play-button" type="button">
+              Play
+            </button>
+            <button
+  class="stop-button play-tools"
+  id="cancel-button"
+  type="button"
+>
+  Stop Playing
+</button>
+            <button class="buy-button" id="buy-button" type="button">
+              Buy prize
+            </button>
+            <div class="control-ready play-tools" id="control-ready">
+              <span>Aim</span>
+              <strong>Use arrows, then Drop</strong>
+            </div>
+            <div class="controls play-tools" aria-label="crane controls">
+              <button type="button" data-move="up">&uarr;</button>
+              <button type="button" data-move="left">&larr;</button>
+              <button type="button" data-move="down">&darr;</button>
+              <button type="button" data-move="right">&rarr;</button>
+            </div>
+            <button
+              class="drop-button play-tools"
+              id="drop-button"
+              type="button"
+            >
+              Drop claw
+            </button>
+            <div class="progress-box">
+              <span id="detail-guarantee"></span>
+              <strong id="guarantee-progress">0 / 0 plays</strong>
+            </div>
+          </aside>
+        </div>
+
+        <section class="prize-strip">
+          <div class="section-head compact">
+            <div>
+              <p class="eyebrow">Prize preview</p>
+              <h2>ของรางวัลในเครื่องนี้</h2>
+            </div>
+          </div>
+          <div class="preview-row" id="preview-row"></div>
+        </section>
+      </section>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
