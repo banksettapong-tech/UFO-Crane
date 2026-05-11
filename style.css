@@ -30,6 +30,7 @@ body {
     var(--bg);
   color: var(--text);
   font-family: "Inter", "Noto Sans Thai", system-ui, sans-serif;
+  overflow-x: hidden; -webkit-text-size-adjust: 100%;
 }
 
 button,
@@ -414,16 +415,26 @@ a {
 }
 
 .machine-card {
+  display: flex;
+  flex-direction: column;
+
   position: relative;
-  isolation: isolate;
   min-height: 470px;
+
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 18px;
   overflow: hidden;
+
   background: var(--surface);
+
   cursor: pointer;
+
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
-  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease;
 }
 
 .machine-card:hover {
@@ -439,38 +450,64 @@ a {
   display: block;
 }
 
+/* ลบ overlay เดิม */
 .machine-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(180deg, transparent 34%, rgba(7, 9, 15, 0.98));
-  pointer-events: none;
+  display: none;
 }
 
+/* ส่วนข้อความด้านล่าง */
 .card-copy {
-  position: absolute;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  padding: 16px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(16, 20, 31, 0.96),
+      rgba(10, 12, 18, 1)
+    );
+
+  position: relative;
   z-index: 2;
-  left: 16px;
-  right: 16px;
-  bottom: 16px;
 }
 
 .card-copy h3 {
-  margin: 0 0 8px;
-  font-size: 1.14rem;
-  line-height: 1.28;
+  margin: 0 0 6px;
+
+  font-size: 1.08rem;
+  line-height: 1.35;
+
+  color: #fff;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  min-height: auto;
 }
 
 .guarantee-line {
   width: fit-content;
-  margin-bottom: 10px;
-  padding: 6px 9px;
+
+  margin-bottom: 8px;
+  margin-top: 0;
+
+  padding: 5px 9px;
+
   border: 1px solid rgba(255, 188, 58, 0.38);
   border-radius: 999px;
+
   background: rgba(255, 188, 58, 0.12);
+
   color: #ffd46e;
-  font-size: 0.76rem;
+
+  font-size: 0.74rem;
   font-weight: 900;
 }
 
@@ -478,8 +515,11 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 10px;
-}
+
+  margin-top: auto;
+} 
 
 .price-compare {
   display: flex;
@@ -1695,4 +1735,304 @@ a {
   );
   color: #fff;
   border-color: transparent;
+}
+
+/* =========================
+   EXTRA RESPONSIVE FIXES
+========================= */
+
+/* ป้องกัน element ล้นจอ */
+img,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ป้องกันข้อความยาวดัน layout */
+* {
+  min-width: 0;
+}
+
+/* -------------------------
+   Large Desktop
+-------------------------- */
+@media (min-width: 1600px) {
+  .machine-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .hero {
+    max-width: 1700px;
+    margin: 0 auto;
+  }
+
+  .browse {
+    max-width: 1700px;
+    margin: 0 auto;
+  }
+}
+
+/* -------------------------
+   Laptop / Tablet
+-------------------------- */
+@media (max-width: 1200px) {
+
+  .machine-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .hero {
+    gap: 30px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .play-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .control-panel {
+    width: 100%;
+  }
+}
+
+/* -------------------------
+   Tablet Portrait
+-------------------------- */
+@media (max-width: 900px) {
+
+  .topbar {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    height: auto;
+    padding: 14px 18px;
+  }
+
+  .wallet {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .nav {
+    justify-content: flex-start;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+    padding-top: 24px;
+  }
+
+  .hero-copy {
+    order: 2;
+  }
+
+  .hero-stage {
+    order: 1;
+    min-height: auto;
+  }
+
+  .browse {
+    grid-template-columns: 1fr;
+  }
+
+  .filters {
+    position: static;
+  }
+
+  .machine-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .preview-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .info-band {
+    grid-template-columns: 1fr;
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* -------------------------
+   Mobile
+-------------------------- */
+@media (max-width: 640px) {
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .topbar {
+    padding-inline: 12px;
+  }
+
+  .brand {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .wallet {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .coin,
+  .points-pill,
+  .cart-button {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .hero {
+    padding: 18px 14px 40px;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+    line-height: 1.3;
+  }
+
+  .hero-copy p:not(.eyebrow) {
+    font-size: 0.95rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-actions a,
+  .hero-actions button {
+    width: 100%;
+  }
+
+  .hero-stage,
+  .hero-stage img {
+    min-height: 260px;
+  }
+
+  .ticker {
+    grid-template-columns: 1fr;
+  }
+
+  .machine-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .machine-card {
+    min-height: 420px;
+  }
+
+  .card-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .machine-title {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+  }
+
+  .price-pill {
+    width: fit-content;
+  }
+
+  .play-layout {
+    gap: 14px;
+  }
+
+  .machine-viewport {
+    aspect-ratio: 4 / 3;
+  }
+
+  .control-panel {
+    padding: 12px;
+  }
+
+  .queue {
+    grid-template-columns: 1fr;
+  }
+
+  .queue div {
+    grid-column: auto !important;
+    border-left: 0 !important;
+  }
+
+  .controls {
+    transform: scale(0.9);
+  }
+
+  .play-button {
+    width: 92px;
+    height: 92px;
+    font-size: 1rem;
+  }
+
+  .drop-button,
+  .buy-button,
+  .stop-button {
+    width: 100%;
+  }
+
+  .preview-row {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-item {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .cart-item img {
+    margin: 0 auto;
+  }
+
+  .support-band {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* -------------------------
+   Small Mobile
+-------------------------- */
+@media (max-width: 400px) {
+
+  .hero h1 {
+    font-size: 1.7rem;
+  }
+
+  .section-head h2,
+  .machine-title h1 {
+    font-size: 1.3rem;
+  }
+
+  .controls {
+    transform: scale(0.82);
+  }
+
+  .play-button {
+    width: 82px;
+    height: 82px;
+  }
+
+  .coin,
+  .points-pill,
+  .cart-button {
+    font-size: 0.72rem;
+    padding: 8px;
+  }
 }

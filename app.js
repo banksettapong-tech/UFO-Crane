@@ -306,7 +306,7 @@ function renderGrid() {
             <div class="guarantee-line">${guaranteeLabel(machine)}</div>
             <div class="card-meta">
               <span class="badge">${machine.status === "available" ? "Ready" : `${machine.waiting} queue`}</span>
-              <span class="price">${money(machine.discountedPlayPrice)} / play</span>
+              
             </div>
             <div class="price-compare">
               <span>Buy now</span>
@@ -365,7 +365,7 @@ function renderDetail(id) {
   document.querySelector("#detail-status").textContent = machine.status === "available" ? "Ready to play" : "Queue active";
   document.querySelector("#detail-name").textContent = machine.name;
   document.querySelector("#detail-price").textContent = `Play ${money(machine.discountedPlayPrice)}`;
-  document.querySelector("#detail-price-inline").textContent = money(machine.discountedPlayPrice);
+
   document.querySelector("#detail-buy-inline").textContent = money(machine.buyPrice);
   document.querySelector("#detail-play-reward").textContent = `${points(machine.playReward)} / play`;
   document.querySelector("#detail-buy-reward").textContent = `${points(machine.buyReward)} / order`;
