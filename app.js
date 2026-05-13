@@ -517,11 +517,16 @@ function bindDetail(machine) {
   });
 
   document.querySelectorAll("[data-share]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const label = button.dataset.share;
-      toast.textContent = `Share draft ready for ${label}: ${machine.name}`;
-    });
+
+  button.addEventListener("click", () => {
+
+    const platform = button.dataset.share;
+
+    renderSharePreview(platform, machine);
+
   });
+
+});
 }
 
 function updateGuaranteeProgress(machine) {
@@ -652,6 +657,92 @@ function renderModal(content) {
       layer.remove();
     }
   });
+}
+
+function renderSharePreview(platform, machine) {
+
+  const captions = {
+    facebook:
+      `🔥 วันนี้ลองเล่น ${machine.name} ที่ UFO Crane!\nลุ้นได้ของจริงแบบออนไลน์ 🎯`,
+
+    tiktok:
+      `POV: เกือบคีบได้ 😭🎯\n${machine.name} คือโหดมาก #ufocrane`,
+
+    instagram:
+      `คืนนี้มาลองคีบ ${machine.name} ✨🛸\nใครจะโดนตกก่อนกัน 💖`,
+  };
+
+  const hashtags = {
+    facebook: ["UFOCrane", "OnlineClaw", "Lucky"],
+    tiktok: ["fyp", "clawmachine", "arcade"],
+    instagram: ["kawaii", "gaming", "arttoy"],
+  };
+
+  renderModal(`
+    <div class="share-preview">
+
+      <div class="share-preview-top">
+        <div class="share-preview-avatar"></div>
+
+        <div>
+          <strong>Demo Player</strong>
+          <span>
+            ${platform.toUpperCase()} Preview
+          </span>
+        </div>
+      </div>
+
+      <img
+        class="share-preview-image"
+        src="${machine.image}"
+        alt="${machine.name}"
+      />
+
+      <div class="share-preview-body">
+
+        <p>${captions[platform]}</p>
+
+        <div class="share-tags">
+          ${hashtags[platform]
+            .map(tag => `<span>#${tag}</span>`)
+            .join("")}
+        </div>
+
+        <div class="share-actions">
+          <button
+            class="share-cancel"
+            type="button"
+            data-close-modal
+          >
+            Cancel
+          </button>
+
+          <button
+            class="share-submit"
+            type="button"
+            id="fake-share-submit"
+          >
+            Share Post
+          </button>
+        </div>
+
+      </div>
+    </div>
+  `);
+
+  document
+    .querySelector("#fake-share-submit")
+    ?.addEventListener("click", () => {
+
+      document.querySelector(".modal-layer")?.remove();
+
+      const toast = document.querySelector("#play-toast");
+
+      if (toast) {
+        toast.textContent =
+          `Shared to ${platform.toUpperCase()} successfully ✨`;
+      }
+    });
 }
 
 function route() {

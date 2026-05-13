@@ -1220,7 +1220,7 @@ a {
 }
 
 .modal-card {
-  width: min(820px, 100%);
+  width: min(560px, 100%);
   max-height: min(760px, 92svh);
   overflow: auto;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -2035,4 +2035,98 @@ canvas {
     font-size: 0.72rem;
     padding: 8px;
   }
+}
+
+/* =========================
+   SHARE PREVIEW MODAL
+========================= */
+
+.share-preview {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #fff;
+  color: #172033;
+}
+
+.share-preview-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(23,32,51,.08);
+}
+
+.share-preview-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#25f4a6,#7a5cff,#ff4f8f);
+}
+
+.share-preview-top strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.share-preview-top span {
+  color: #607089;
+  font-size: 0.78rem;
+}
+
+.share-preview-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  background: #eef3f8;
+}
+
+.share-preview-body {
+  padding: 16px 18px 20px;
+}
+
+.share-preview-body p {
+  margin: 0 0 14px;
+  line-height: 1.6;
+}
+
+.share-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.share-tags span {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(37,244,166,.1);
+  color: #00a86d;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.share-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.share-actions button {
+  flex: 1;
+  padding: 13px;
+  border: 0;
+  border-radius: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.share-cancel {
+  background: #edf2f7;
+  color: #172033;
+}
+
+.share-submit {
+  background: linear-gradient(135deg,#25f4a6,#12d97b);
+  color: #06100c;
 }
