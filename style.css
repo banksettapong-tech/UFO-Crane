@@ -728,21 +728,40 @@ a {
 .machine-viewport {
   position: relative;
   overflow: hidden;
+  --claw-top: 2px;
+  --claw-lift-y: 92px;
   aspect-ratio: 16 / 9;
   height: auto;
   min-height: 0;
   max-height: 620px;
   overflow: hidden;
-  background: #dfe8ef;
+  background:
+    linear-gradient(90deg, #d9c5d2 0 13%, transparent 13% 87%, #d4bfcd 87% 100%),
+    linear-gradient(180deg, #c6aebb 0 15%, transparent 15%),
+    linear-gradient(180deg, #d8c6d0 0%, #cdbbc8 62%, #b6a9b4 62.2% 100%);
+  isolation: isolate;
 }
 
-.machine-viewport img {
+.machine-viewport #detail-hero {
   width: 100%;
   height: 100%;
   min-height: 0;
   object-fit: cover;
-  display: block;
+  display: none;
   transition: transform 260ms ease, filter 260ms ease;
+}
+
+.machine-viewport::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background:
+    linear-gradient(103deg, transparent 0 10%, rgba(238, 219, 232, 0.72) 10.2% 28%, transparent 28.2%),
+    linear-gradient(257deg, transparent 0 10%, rgba(230, 209, 224, 0.72) 10.2% 28%, transparent 28.2%),
+    linear-gradient(180deg, rgba(132, 93, 121, 0.3), rgba(132, 93, 121, 0.02) 64%);
+  clip-path: polygon(16% 0, 84% 0, 96% 100%, 4% 100%);
+  pointer-events: none;
 }
 
 .machine-viewport::after {
@@ -750,35 +769,128 @@ a {
   position: absolute;
   inset: 0;
   background:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.13) 0 1px, transparent 1px 5px),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.2));
+    linear-gradient(90deg, rgba(255, 231, 244, 0.82) 0 2%, transparent 2.2% 97.8%, rgba(255, 231, 244, 0.82) 98% 100%),
+    linear-gradient(180deg, rgba(255, 236, 247, 0.5) 0 2%, transparent 2.2%),
+    radial-gradient(ellipse at 50% 86%, rgba(255, 255, 255, 0.22), transparent 34%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(60, 35, 54, 0.16));
   pointer-events: none;
 }
 
-.machine-viewport.side-camera img {
+.machine-viewport.side-camera #detail-hero {
   transform: none;
   filter: saturate(0.96) contrast(1.03);
 }
 
+.prize-grid {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+}
+
+.prize-grid::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 0;
+  height: 40%;
+  background:
+    linear-gradient(180deg, rgba(245, 239, 244, 0.94), rgba(194, 183, 193, 0.98)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0 1px, transparent 1px 46px);
+  clip-path: polygon(18% 0, 82% 0, 100% 100%, 0 100%);
+  box-shadow:
+    inset 0 16px 24px rgba(255, 255, 255, 0.34),
+    0 -1px 0 rgba(104, 76, 98, 0.18);
+}
+
+.prize-doll {
+  position: absolute;
+  z-index: var(--slot-z);
+  left: var(--slot-x);
+  top: var(--slot-y);
+  width: clamp(54px, 7.3vw, 98px);
+  height: clamp(54px, 7.3vw, 98px);
+  object-fit: contain;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(var(--slot-scale));
+  transform-origin: center bottom;
+  filter: drop-shadow(0 18px 14px rgba(59, 42, 56, 0.28));
+  transition:
+    opacity 240ms ease,
+    transform 420ms ease,
+    filter 240ms ease;
+}
+
+.prize-doll.is-gone {
+  opacity: 0;
+  transform: translate(-50%, -72%) scale(calc(var(--slot-scale) * 0.6));
+  filter: drop-shadow(0 4px 4px rgba(59, 42, 56, 0));
+}
+
+.caught-prize {
+  position: absolute;
+  z-index: 3;
+  left: var(--caught-x, var(--claw-x, 50%));
+  top: var(--caught-y, 70%);
+  width: clamp(52px, 7.1vw, 96px);
+  height: clamp(52px, 7.1vw, 96px);
+  object-fit: contain;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(calc(var(--claw-scale, 1) * 0.72)) rotate(-3deg);
+  filter: drop-shadow(0 16px 18px rgba(18, 30, 48, 0.28));
+  transition:
+    left 180ms ease,
+    top 520ms ease,
+    opacity 180ms ease,
+    transform 520ms ease;
+  pointer-events: none;
+}
+
+.caught-prize.is-caught {
+  left: var(--claw-x, 50%);
+  top: calc(var(--claw-lift-y) + 174px);
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(calc(var(--claw-scale, 1) * 0.82)) rotate(2deg);
+}
+
+.caught-prize.is-lifted {
+  left: var(--claw-x, 50%);
+  top: var(--claw-lift-y);
+  transform: translate(-50%, -50%) scale(calc(var(--claw-scale, 1) * 0.7)) rotate(-2deg);
+}
+
+.caught-prize.is-falling {
+  left: var(--claw-x, 50%);
+  top: 78%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(calc(var(--claw-scale, 1) * 0.66)) rotate(18deg);
+  transition:
+    top 680ms cubic-bezier(0.18, 0.72, 0.42, 1),
+    opacity 420ms ease 220ms,
+    transform 680ms ease;
+}
+
 .claw {
   --x: 50%;
-  --y: 13%;
   --drop: 0px;
 
   position: absolute;
   z-index: 4;
 
   left: var(--x);
-  top: var(--y);
+  top: var(--claw-top);
 
-  width: clamp(86px, 9vw, 112px);
-  height: clamp(220px, 26vw, 320px);
+  width: clamp(58px, 6.1vw, 82px);
+  height: clamp(160px, 19vw, 240px);
 
-  transform: translateX(-50%);
+  transform: translateX(-50%) scale(var(--claw-scale, 1));
+  transform-origin: top center;
 
   transition:
     left 180ms ease,
-    top 180ms ease;
+    transform 180ms ease;
 }
 
 .claw::before {
@@ -786,10 +898,10 @@ a {
   position: absolute;
 
   left: 50%;
-  top: -140px;
+  top: -118px;
 
-  width: 7px;
-  height: calc(160px + var(--drop));
+  width: 5px;
+  height: calc(132px + var(--drop));
 
   border-radius: 999px;
 
@@ -814,8 +926,8 @@ a {
   left: 50%;
   top: -14px;
 
-  width: 92px;
-  height: 26px;
+  width: 68px;
+  height: 20px;
 
   border-radius: 999px;
 
@@ -844,8 +956,8 @@ a {
 
   top: calc(12px + var(--drop));
 
-  width: 54px;
-  height: 46px;
+  width: 40px;
+  height: 34px;
 
   border-radius: 16px 16px 20px 20px;
 
@@ -866,7 +978,7 @@ a {
 }
 
 .claw span::before {
-  right: 36px;
+  right: 27px;
   border-right: 0;
   transform: rotate(18deg);
 }
@@ -875,12 +987,12 @@ a {
 .claw span::after {
   content: "";
 
-  top: 34px;
+  top: 25px;
 
-  width: 18px;
-  height: 78px;
+  width: 14px;
+  height: 58px;
 
-  border: 7px solid #dfe8f4;
+  border: 5px solid #dfe8f4;
   border-top: 0;
 
   border-radius: 0 0 18px 18px;
@@ -890,13 +1002,29 @@ a {
 }
 
 .claw span::after {
-  left: 36px;
+  left: 27px;
   border-left: 0;
   transform: rotate(-18deg);
 }
 
 .claw.dropping {
-  --drop: 180px;
+  --drop: 185px;
+}
+
+.claw.has-prize span::before {
+  transform: rotate(6deg);
+}
+
+.claw.has-prize span::after {
+  transform: rotate(-6deg);
+}
+
+.claw.missed span::before {
+  transform: rotate(28deg);
+}
+
+.claw.missed span::after {
+  transform: rotate(-28deg);
 }
 
 .camera-hud {
@@ -1101,9 +1229,9 @@ a {
   grid-template-columns: repeat(3, 56px);
   grid-template-rows: repeat(3, 56px);
   grid-template-areas:
-    ". up ."
+    ". in ."
     "left . right"
-    ". down .";
+    ". out .";
   justify-content: center;
   gap: 7px;
 }
@@ -1132,7 +1260,27 @@ a {
   border-right: 3px solid #172033;
 }
 
-.controls [data-move="up"]::before {
+.controls [data-move="in"]::after,
+.controls [data-move="out"]::after {
+  position: absolute;
+  left: 50%;
+  bottom: 7px;
+  transform: translateX(-50%);
+  color: #607089;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.controls [data-move="in"]::after {
+  content: "IN";
+}
+
+.controls [data-move="out"]::after {
+  content: "OUT";
+}
+
+.controls [data-move="in"]::before {
   transform: translateY(4px) rotate(-45deg);
 }
 
@@ -1140,7 +1288,7 @@ a {
   transform: translateX(-3px) rotate(45deg);
 }
 
-.controls [data-move="down"]::before {
+.controls [data-move="out"]::before {
   transform: translateY(-4px) rotate(135deg);
 }
 
@@ -1153,16 +1301,16 @@ a {
   transform: translateY(-2px);
 }
 
-.controls [data-move="up"] {
-  grid-area: up;
+.controls [data-move="in"] {
+  grid-area: in;
 }
 
 .controls [data-move="left"] {
   grid-area: left;
 }
 
-.controls [data-move="down"] {
-  grid-area: down;
+.controls [data-move="out"] {
+  grid-area: out;
 }
 
 .controls [data-move="right"] {
@@ -1175,6 +1323,12 @@ a {
   color: #fff;
   font-weight: 900;
   box-shadow: 0 10px 22px rgba(255, 79, 143, 0.22);
+}
+
+.drop-button:disabled {
+  cursor: wait;
+  filter: grayscale(0.2) brightness(0.94);
+  opacity: 0.72;
 }
 
 .buy-button {
@@ -1231,8 +1385,99 @@ a {
 }
 
 .checkout-modal,
-.cart-modal {
+.cart-modal,
+.signup-bonus-modal {
   padding: 22px;
+}
+
+.signup-bonus-modal {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 79, 143, 0.14), transparent 38%),
+    linear-gradient(180deg, #fff, #f6fbff);
+}
+
+.bonus-visual {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  min-height: 150px;
+  border-radius: 8px;
+  background:
+    linear-gradient(110deg, rgba(255, 231, 244, 0.96), rgba(218, 239, 255, 0.92)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.42) 0 1px, transparent 1px 28px);
+  box-shadow: inset 0 -18px 38px rgba(23, 32, 51, 0.08);
+}
+
+.bonus-visual strong {
+  color: #172033;
+  font-size: clamp(2.35rem, 9vw, 4.9rem);
+  line-height: 0.9;
+  font-weight: 900;
+}
+
+.bonus-visual span {
+  color: #ff4f8f;
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.bonus-copy h2 {
+  margin: 6px 0 8px;
+  color: #172033;
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  line-height: 1.06;
+}
+
+.bonus-copy p {
+  margin: 0;
+  color: #607089;
+  line-height: 1.65;
+  font-weight: 700;
+}
+
+.bonus-rewards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.bonus-rewards span {
+  min-height: 82px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid rgba(23, 32, 51, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #607089;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.bonus-rewards strong {
+  display: block;
+  color: #ff4f8f;
+  font-size: 1.28rem;
+}
+
+.bonus-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.modal-close.subtle {
+  background: transparent;
+  color: #607089;
+  box-shadow: none;
 }
 
 .modal-head {
@@ -1630,7 +1875,7 @@ a {
   }
 
   .machine-viewport,
-  .machine-viewport img {
+  .machine-viewport #detail-hero {
     aspect-ratio: 4 / 3;
     height: auto;
   }
@@ -1991,6 +2236,11 @@ canvas {
     grid-template-columns: 1fr;
   }
 
+  .bonus-rewards,
+  .bonus-actions {
+    grid-template-columns: 1fr;
+  }
+
   .cart-item {
     grid-template-columns: 1fr;
     text-align: center;
@@ -2034,6 +2284,223 @@ canvas {
   .cart-button {
     font-size: 0.72rem;
     padding: 8px;
+  }
+}
+
+/* -------------------------
+   Play Screen Responsiveness
+-------------------------- */
+@media (max-width: 760px) {
+  .machine-page {
+    min-height: auto;
+    padding: 8px 10px 18px;
+  }
+
+  .machine-title {
+    grid-template-columns: auto 1fr;
+    gap: 8px 10px;
+    margin-bottom: 8px;
+  }
+
+  .machine-title .eyebrow,
+  .price-pill {
+    display: none;
+  }
+
+  .machine-title h1 {
+    font-size: 1.08rem;
+    line-height: 1.15;
+  }
+
+  .back-link {
+    padding: 8px 10px;
+    font-size: 0.78rem;
+  }
+
+  .play-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 100%;
+  }
+
+  .live-panel,
+  .control-panel {
+    border-radius: 8px;
+    box-shadow: 0 10px 24px rgba(22, 34, 52, 0.12);
+  }
+
+  .camera-bar {
+    min-height: 36px;
+    padding-inline: 10px;
+    font-size: 0.78rem;
+  }
+
+  .camera-tabs {
+    gap: 4px;
+  }
+
+  .camera-tab {
+    padding: 6px 8px;
+    font-size: 0.7rem;
+  }
+
+  .machine-viewport {
+    aspect-ratio: 16 / 11;
+    max-height: 48svh;
+  }
+
+  .share-row {
+    display: none;
+  }
+
+  .play-toast {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    padding: 9px 10px;
+    font-size: 0.78rem;
+  }
+
+  .camera-hud {
+    left: 10px;
+    top: 10px;
+    font-size: 0.66rem;
+  }
+
+  .camera-hud span {
+    padding: 6px 8px;
+  }
+
+  .control-panel {
+    gap: 8px;
+    padding: 9px;
+  }
+
+  .queue {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .queue div {
+    min-height: 30px;
+    padding: 7px 9px;
+    gap: 6px;
+  }
+
+  .queue span {
+    font-size: 0.68rem;
+  }
+
+  .queue strong {
+    font-size: 0.78rem;
+  }
+
+  .queue div:nth-child(3) strong,
+  .queue div:nth-child(4) strong,
+  .queue div:nth-child(5) strong,
+  .queue div:nth-child(6) strong {
+    padding: 4px 8px;
+    border-width: 1px;
+  }
+
+  .play-button {
+    width: 78px;
+    height: 78px;
+    margin-top: 0;
+    font-size: 0.95rem;
+  }
+
+  .control-panel.is-playing {
+    grid-template-columns: 168px minmax(0, 1fr);
+    grid-template-areas:
+      "controls drop"
+      "controls stop"
+      "progress progress";
+    align-items: center;
+    gap: 8px;
+  }
+
+  .control-panel.is-playing .queue,
+  .control-panel.is-playing .control-ready,
+  .control-panel.is-playing .buy-button {
+    display: none;
+  }
+
+  .control-panel.is-playing .controls {
+    grid-area: controls;
+    grid-template-columns: repeat(3, 48px);
+    grid-template-rows: repeat(3, 48px);
+    gap: 5px;
+    transform: scale(0.86);
+    transform-origin: center;
+    justify-self: center;
+  }
+
+  .control-panel.is-playing .controls button {
+    width: 48px;
+    height: 48px;
+  }
+
+  .control-panel.is-playing .drop-button {
+    grid-area: drop;
+    width: 100%;
+    min-height: 58px;
+    padding: 10px;
+  }
+
+  .control-panel.is-playing .stop-button {
+    grid-area: stop;
+    width: 100%;
+    min-height: 46px;
+    padding: 10px;
+  }
+
+  .control-panel.is-playing .progress-box {
+    grid-area: progress;
+    padding: 9px 10px;
+    font-size: 0.74rem;
+  }
+
+  .prize-strip {
+    margin-top: 12px;
+  }
+}
+
+@media (max-width: 430px) {
+  .topbar {
+    gap: 8px;
+  }
+
+  .machine-page {
+    padding-inline: 7px;
+  }
+
+  .machine-viewport {
+    aspect-ratio: 1 / 0.82;
+    max-height: 44svh;
+  }
+
+  .control-panel.is-playing {
+    grid-template-columns: 142px minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .control-panel.is-playing .controls {
+    grid-template-columns: repeat(3, 42px);
+    grid-template-rows: repeat(3, 42px);
+    gap: 4px;
+    transform: none;
+  }
+
+  .control-panel.is-playing .controls button {
+    width: 42px;
+    height: 42px;
+  }
+
+  .drop-button,
+  .buy-button,
+  .stop-button {
+    font-size: 0.82rem;
   }
 }
 

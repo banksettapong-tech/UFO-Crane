@@ -180,6 +180,8 @@
             </div>
             <div class="machine-viewport" id="machine-viewport">
               <img id="detail-hero" alt="" />
+              <div class="prize-grid" id="prize-grid" aria-hidden="true"></div>
+              <img class="caught-prize" id="caught-prize" alt="" aria-hidden="true" />
               <div class="claw" id="claw">
                 <span></span>
               </div>
@@ -241,12 +243,12 @@
             </button>
             <div class="control-ready play-tools" id="control-ready">
               <span>Aim</span>
-              <strong>Use arrows, then Drop</strong>
+              <strong>Move left/right, in/out</strong>
             </div>
             <div class="controls play-tools" aria-label="crane controls">
-              <button type="button" data-move="up">&uarr;</button>
+              <button type="button" data-move="in" aria-label="Move claw in">In</button>
               <button type="button" data-move="left">&larr;</button>
-              <button type="button" data-move="down">&darr;</button>
+              <button type="button" data-move="out" aria-label="Move claw out">Out</button>
               <button type="button" data-move="right">&rarr;</button>
             </div>
             <button

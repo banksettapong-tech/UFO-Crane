@@ -148,19 +148,45 @@ const cameraImages = {
   sideFallback: "assets/demo-crane-side.png",
 };
 
+const cabinetPrizeImage = "assets/ted.png";
+const normalCatchRate = 0.06;
+
 const state = {
   category: "all",
   quick: "all",
   query: "",
   clawX: 50,
-  clawY: 13,
+  clawY: 30,
   camera: 1,
   playing: false,
+  dropping: false,
   cash: 250000,
   points: 0,
+  freePlays: 0,
   cart: [],
   plays: {},
+  prizeRacks: {},
+  signupBonusShown: false,
+  signupBonusClaimed: false,
 };
+
+const prizeSlots = [
+  { x: 28, y: 70, scale: 1.14 },
+  { x: 40, y: 70, scale: 1.16 },
+  { x: 52, y: 70, scale: 1.18 },
+  { x: 64, y: 70, scale: 1.16 },
+  { x: 76, y: 70, scale: 1.12 },
+  { x: 32, y: 61, scale: 0.92 },
+  { x: 44, y: 61, scale: 0.94 },
+  { x: 56, y: 61, scale: 0.96 },
+  { x: 68, y: 61, scale: 0.94 },
+  { x: 80, y: 61, scale: 0.9 },
+  { x: 36, y: 53, scale: 0.74 },
+  { x: 48, y: 53, scale: 0.76 },
+  { x: 60, y: 53, scale: 0.78 },
+  { x: 72, y: 53, scale: 0.76 },
+  { x: 84, y: 53, scale: 0.72 },
+];
 
 const app = document.querySelector("#app");
 const homeTemplate = document.querySelector("#home-template");
@@ -184,6 +210,48 @@ function guaranteeLabel(machine) {
 
 function playCount(machine) {
   return state.plays[machine.id] || 0;
+}
+
+function prizeRack(machine) {
+  if (!state.prizeRacks[machine.id] || !state.prizeRacks[machine.id].some(Boolean)) {
+    state.prizeRacks[machine.id] = Array(prizeSlots.length).fill(true);
+  }
+  return state.prizeRacks[machine.id];
+}
+
+function renderPrizeRack(machine) {
+  const grid = document.querySelector("#prize-grid");
+  if (!grid) return;
+
+  const rack = prizeRack(machine);
+  grid.innerHTML = prizeSlots
+    .map((slot, index) => `
+      <img
+        class="prize-doll ${rack[index] ? "" : "is-gone"}"
+        src="${cabinetPrizeImage}"
+        alt=""
+        data-prize-index="${index}"
+        style="--slot-x: ${slot.x}%; --slot-y: ${slot.y}%; --slot-scale: ${slot.scale}; --slot-z: ${prizeSlots.length - index};"
+      />
+    `)
+    .join("");
+}
+
+function nearestPrizeIndex(machine) {
+  const rack = prizeRack(machine);
+  return prizeSlots.reduce((best, slot, index) => {
+    if (!rack[index]) return best;
+
+    const score = Math.abs(slot.x - state.clawX) + Math.abs(slot.y - (state.clawY + 35)) * 1.25;
+    if (!best || score < best.score) return { index, score };
+    return best;
+  }, null);
+}
+
+function hidePrize(machine, index) {
+  const rack = prizeRack(machine);
+  rack[index] = false;
+  document.querySelector(`[data-prize-index="${index}"]`)?.classList.add("is-gone");
 }
 
 function updateHeader() {
@@ -354,9 +422,10 @@ function renderGrid() {
 function renderDetail(id) {
   const machine = machines.find((item) => item.id === id) || machines[0];
   state.clawX = 50;
-  state.clawY = 13;
+  state.clawY = 30;
   state.camera = 1;
   state.playing = false;
+  state.dropping = false;
 
   app.replaceChildren(detailTemplate.content.cloneNode(true));
   updateHeader();
@@ -379,6 +448,9 @@ function renderDetail(id) {
     hero.onerror = null;
     hero.src = cameraImages.frontFallback;
   };
+
+  document.querySelector("#caught-prize").src = cabinetPrizeImage;
+  renderPrizeRack(machine);
   updateGuaranteeProgress(machine);
 
   const row = document.querySelector("#preview-row");
@@ -426,9 +498,9 @@ function bindDetail(machine) {
       const move = button.dataset.move;
       if (move === "left") state.clawX = Math.max(18, state.clawX - 7);
       if (move === "right") state.clawX = Math.min(82, state.clawX + 7);
-      if (move === "up") state.clawY = Math.max(10, state.clawY - 5);
-      if (move === "down") state.clawY = Math.min(42, state.clawY + 5);
-      toast.textContent = `Position ${Math.round(state.clawX)} / ${Math.round(state.clawY)}`;
+      if (move === "in") state.clawY = Math.max(18, state.clawY - 5);
+      if (move === "out") state.clawY = Math.min(42, state.clawY + 5);
+      toast.textContent = `Rail ${Math.round(state.clawX)} / depth ${Math.round(state.clawY)}`;
       updateClaw();
     });
   });
@@ -449,37 +521,75 @@ function bindDetail(machine) {
   });
 
   dropButton.addEventListener("click", () => {
-  if (!state.playing) return;
+  if (!state.playing || state.dropping) return;
 
-  const result = spendCash(
-    machine.discountedPlayPrice,
-    machine.playReward
-  );
+  const usedFreePlay = state.freePlays > 0;
+  const result = usedFreePlay
+    ? { ok: true }
+    : spendCash(machine.discountedPlayPrice, machine.playReward);
 
   if (!result.ok) {
     toast.textContent = result.text;
     return;
   }
 
+  if (usedFreePlay) {
+    state.freePlays -= 1;
+    state.points += machine.playReward;
+    updateHeader();
+  }
+
   state.plays[machine.id] = playCount(machine) + 1;
+  state.dropping = true;
 
   updateGuaranteeProgress(machine);
 
   const claw = document.querySelector("#claw");
+  const caughtPrize = document.querySelector("#caught-prize");
+  const nearestPrize = nearestPrizeIndex(machine);
+  const targetSlot = nearestPrize ? prizeSlots[nearestPrize.index] : { x: state.clawX, y: 70 };
+  const viewport = document.querySelector("#machine-viewport");
+  const guaranteeCatch = playCount(machine) >= machine.guaranteePlays;
+  const canGrip = Boolean(nearestPrize) && nearestPrize.score < 11;
+  const success = guaranteeCatch || (canGrip && Math.random() < normalCatchRate);
+  const liftsPrize = guaranteeCatch || canGrip;
+  viewport.style.setProperty("--caught-x", `${targetSlot.x}%`);
+  viewport.style.setProperty("--caught-y", `${targetSlot.y}%`);
 
   claw.classList.add("dropping");
+  dropButton.disabled = true;
 
-  toast.textContent =
-    `-${money(machine.discountedPlayPrice)} • Dropping...`;
+  toast.textContent = usedFreePlay
+    ? `Free play used. ${state.freePlays} left - Dropping...`
+    : `-${money(machine.discountedPlayPrice)} - Dropping...`;
+
+  window.setTimeout(() => {
+    if (liftsPrize) {
+      claw.classList.add("has-prize");
+      caughtPrize.classList.add("is-caught");
+      toast.textContent = "Grip locked. Lifting prize...";
+    } else {
+      claw.classList.add("missed");
+      toast.textContent = "Grip slipped. Lifting claw...";
+    }
+  }, 560);
 
   window.setTimeout(() => {
     claw.classList.remove("dropping");
+    caughtPrize.classList.toggle("is-lifted", liftsPrize);
+    if (success) hidePrize(machine, nearestPrize.index);
+  }, 920);
 
-    const success = Math.abs(state.clawX - 50) < 9;
-
+  window.setTimeout(() => {
     if (success) {
       toast.textContent =
-        `Nice catch! +${points(machine.playReward)}`;
+        `Nice catch! Prize lifted. +${points(machine.playReward)}`;
+    } else if (liftsPrize) {
+      caughtPrize.classList.add("is-falling");
+      claw.classList.remove("has-prize");
+      claw.classList.add("missed");
+      toast.textContent =
+        `Almost... it slipped. +${points(machine.playReward)}`;
     } else {
       toast.textContent =
         `Missed... +${points(machine.playReward)}`;
@@ -495,8 +605,16 @@ function bindDetail(machine) {
       toast.textContent =
         `${guaranteeLabel(machine)} complete. Prize added to cart automatically.`;
     }
-  }, 720);
+
+    window.setTimeout(() => {
+      claw.classList.remove("has-prize", "missed");
+      caughtPrize.classList.remove("is-caught", "is-lifted", "is-falling");
+      dropButton.disabled = false;
+      state.dropping = false;
+    }, liftsPrize ? 1100 : 350);
+  }, 1480);
 });
+
 
   document.querySelectorAll("[data-camera]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -539,7 +657,12 @@ function updateClaw() {
   const claw = document.querySelector("#claw");
   if (!claw) return;
   claw.style.setProperty("--x", `${state.clawX}%`);
-  claw.style.setProperty("--y", `${state.clawY}%`);
+  const viewport = document.querySelector("#machine-viewport");
+  if (viewport) {
+    viewport.style.setProperty("--claw-x", `${state.clawX}%`);
+    viewport.style.setProperty("--claw-y", `${state.clawY}%`);
+    viewport.style.setProperty("--claw-scale", String(0.72 + ((state.clawY - 18) / 24) * 0.5));
+  }
 }
 
 function renderCheckoutModal(machine) {
@@ -639,6 +762,67 @@ function renderCartModal() {
       <button class="checkout-confirm" type="button" data-close-modal>Continue shopping</button>
     </div>
   `);
+}
+
+function renderSignupBonusModal() {
+  renderModal(`
+    <div class="signup-bonus-modal">
+      <div class="bonus-visual" aria-hidden="true">
+        <strong>WELCOME</strong>
+        <span>New player gift</span>
+      </div>
+      <div class="bonus-copy">
+        <p class="eyebrow">Member welcome bonus</p>
+        <h2>สมัครสมาชิกวันนี้ รับเครดิตคีบฟรีทันที</h2>
+        <p>
+          เริ่มเล่นแบบไม่ต้องรอ รับโบนัสสำหรับสมาชิกใหม่ไว้ลองคีบตู้แรก
+          พร้อมแต้มสะสมสำหรับแลกรอบพิเศษ
+        </p>
+      </div>
+      <div class="bonus-rewards" aria-label="signup bonus rewards">
+        <span><strong>5</strong> free claw plays</span>
+        <span><strong>500</strong> bonus points</span>
+      </div>
+      <div class="bonus-actions">
+        <button class="checkout-confirm" type="button" data-claim-signup-bonus>
+          รับโบนัสสมาชิกใหม่
+        </button>
+        <button class="modal-close subtle" type="button" data-close-modal>
+          ไว้ทีหลัง
+        </button>
+      </div>
+    </div>
+  `);
+
+  const bonusModal = document.querySelector(".signup-bonus-modal");
+  bonusModal.querySelector(".bonus-copy h2").textContent = "Join today and start with free drops.";
+  bonusModal.querySelector(".bonus-copy p:not(.eyebrow)").textContent =
+    "Claim your starter bonus, try the claw, and collect points for the next round.";
+  bonusModal.querySelector("[data-claim-signup-bonus]").textContent = "Claim welcome bonus";
+  bonusModal.querySelector(".modal-close.subtle").textContent = "Later";
+
+  document.querySelector("[data-claim-signup-bonus]")?.addEventListener("click", () => {
+    if (!state.signupBonusClaimed) {
+      state.freePlays += 5;
+      state.points += 500;
+      state.signupBonusClaimed = true;
+      updateHeader();
+    }
+
+    document.querySelector(".modal-message").textContent = "Welcome bonus added: 5 free plays and 500 points.";
+    document.querySelector("[data-claim-signup-bonus]").disabled = true;
+    window.setTimeout(() => {
+      document.querySelector("[data-claim-signup-bonus]").textContent = "Bonus claimed";
+    }, 0);
+    document.querySelector("[data-claim-signup-bonus]").textContent = "รับโบนัสแล้ว";
+  });
+}
+
+function maybeShowSignupBonus() {
+  if (state.signupBonusShown || sessionStorage.getItem("ufoSignupBonusSeen")) return;
+  state.signupBonusShown = true;
+  sessionStorage.setItem("ufoSignupBonusSeen", "true");
+  window.setTimeout(renderSignupBonusModal, 420);
 }
 
 function renderModal(content) {
@@ -763,3 +947,4 @@ function route() {
 updateHeader();
 window.addEventListener("hashchange", route);
 route();
+maybeShowSignupBonus();
